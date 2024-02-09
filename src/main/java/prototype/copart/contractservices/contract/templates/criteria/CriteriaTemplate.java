@@ -18,14 +18,13 @@ public class CriteriaTemplate
 
 	private Long version;
 
-	@ElementCollection
-	@CollectionTable(name = "criteria_available_options", joinColumns = @JoinColumn(name = "criteria_id"))
-	@Column(name = "available_option")
-	private List<String> availableOptions;
+	private String name;
+
+	private String description;
 
 	@ElementCollection
-	@CollectionTable(name = "criteria_selected_options", joinColumns = @JoinColumn(name = "criteria_id"))
-	@Column(name = "selected_option")
-	private List<String> selectedOptions;
+	@CollectionTable(name = "criteria_template_available_options", joinColumns = @JoinColumn(name = "criteria_id"))
+	@Column(name = "available_option")
+	private List<String> availableOptions;
 
 }

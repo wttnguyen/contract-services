@@ -2,6 +2,7 @@ package prototype.copart.contractservices.contract;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import prototype.copart.contractservices.contract.templates.ContractTemplate;
 import prototype.copart.contractservices.contract.templates.ContractTemplateRepository;
@@ -23,31 +24,51 @@ public class ContractService
 
 	private final CriteriaTemplateRepository criteriaTemplateRepository;
 
-	public void saveContractTemplate(ContractTemplate contractTemplate)
+	public void saveNewContractTemplate(ContractTemplate contractTemplate)
 	{
-		contractTemplate.getPricingTemplates().forEach(pricingTemplate ->
+		if (contractTemplateRepository.existsById(contractTemplate.getId()))
 		{
-			if (!pricingTemplateRepository.existsById(pricingTemplate.getId()))
-			{
-				savePricingTemplate(pricingTemplate);
-			}
-		});
+			throw new DuplicateKeyException(
+					STR. "Contract template ID: \{ contractTemplate.getId() } already exists in the database." );
+		}
+		contractTemplate.getPricingTemplates().forEach(this::saveNewPricingTemplate);
 		contractTemplateRepository.save(contractTemplate);
 	}
 
-	public void savePricingTemplate(PricingTemplate pricingTemplate)
+	public void saveNewPricingTemplate(PricingTemplate pricingTemplate)
 	{
-		pricingTemplate.getCriteriaTemplates().forEach(this::saveCriteriaTemplate);
+		if (pricingTemplateRepository.existsById(pricingTemplate.getId()))
+		{
+			throw new DuplicateKeyException(
+					STR. "Pricing template ID: \{ pricingTemplate.getId() } already exists in the database." );
+		}
+		pricingTemplate.getCriteriaTemplates().forEach(this::saveNewCriteriaTemplate);
 		pricingTemplateRepository.save(pricingTemplate);
 	}
 
-	private void saveCriteriaTemplate(CriteriaTemplate criteriaTemplate)
+	public void saveNewCriteriaTemplate(CriteriaTemplate criteriaTemplate)
 	{
+		if (criteriaTemplateRepository.existsById(criteriaTemplate.getId()))
+		{
+			throw new DuplicateKeyException(
+					STR. "Criteria template ID: \{ criteriaTemplate.getId() } already exists in the database." );
+		}
 		criteriaTemplateRepository.save(criteriaTemplate);
 	}
 
-	public List<ContractTemplate> getAllContractTemplates() {
+	public List<ContractTemplate> getAllContractTemplates()
+	{
 		return contractTemplateRepository.findAll();
+	}
+
+	public List<PricingTemplate> getAllPricingTemplates()
+	{
+		return pricingTemplateRepository.findAll();
+	}
+
+	public List<CriteriaTemplate> getAllCriteriaTemplates()
+	{
+		return criteriaTemplateRepository.findAll();
 	}
 
 }
